@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>West Texas Data Centers (50-mi radius: Abilene & Sweetwater)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet (library links OK; dataset is embedded; tiles are OSM) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #app { display: flex; height: 100%; width: 100%; }
+    #sidebar {
+      width: 360px; max-width: 45vw; padding: 12px 12px 16px 12px;
+      border-right: 1px solid #ddd; box-sizing: border-box; overflow: auto;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    #map { flex: 1; }
+    h1 { font-size: 16px; margin: 0 0 10px 0; }
+    .hint { font-size: 12px; color: #555; margin: 6px 0 10px 0; line-height: 1.35; }
+    .group { margin: 12px 0; }
+    .group label { display: block; font-size: 13px; margin: 6px 0; cursor: pointer; }
+    input[type="text"] {
+      width: 100%; padding: 8px 10px; box-sizing: border-box;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 13px;
+    }
+    .count { font-size: 12px; color: #333; margin-top: 8px; }
+    .legend { font-size: 12px; color: #333; margin-top: 12px; line-height: 1.35; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .btnrow { display: flex; gap: 8px; margin-top: 10px; }
+    button {
+      padding: 8px 10px; font-size: 12px; border: 1px solid #ccc;
+      border-radius: 6px; background: #f7f7f7; cursor: pointer;
+    }
+    button:hover { background: #eee; }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1>West Texas data center build-out map</h1>
+    <div class="hint">
+      Includes planned / under construction / operating data centers within ~50 miles of Abilene and within ~50 miles of Sweetwater,
+      as evidenced by sources captured as of 2026-02-19. Some markers are placed at city/community centroids when parcel-accurate
+      coordinates are not publicly extractable in the captured sources.
+    </div>
+
+    <div class="group">
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">Search</div>
+      <input id="searchBox" type="text" placeholder="Search by project name…" />
+      <div class="count" id="countBox"></div>
+    </div>
+
+    <div class="group">
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">Status filter</div>
+      <label><input type="checkbox" class="statusBox" value="Announced" checked> Announced</label>
+      <label><input type="checkbox" class="statusBox" value="Under construction" checked> Under construction</label>
+      <label><input type="checkbox" class="statusBox" value="Operating" checked> Operating</label>
+      <label><input type="checkbox" class="statusBox" value="Paused" checked> Paused</label>
+
+      <div class="btnrow">
+        <button id="selectAllBtn" type="button">Select all</button>
+        <button id="selectNoneBtn" type="button">Select none</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div style="font-weight: 600; margin-bottom: 6px;">Marker legend</div>
+      <div><span class="dot" style="background:#2a7;"></span> Operating</div>
+      <div><span class="dot" style="background:#f80;"></span> Under construction</div>
+      <div><span class="dot" style="background:#06c;"></span> Announced</div>
+      <div><span class="dot" style="background:#888;"></span> Paused</div>
+    </div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<script>
+  // === Embedded dataset (no external data files) ===
+  const SITES = [
+    {
+      id: "stargate-abilene",
+      name: "Stargate 1 / Lancium Clean Campus (Abilene AI campus)",
+      status: "Under construction",
+      developer: "Lancium + Crusoe",
+      county: "Taylor County, TX",
+      location: "5502 Spinks Rd area; NW Abilene (Old Anson Rd–Spinks Rd band, west of US-277, north of I-20)",
+      lat: 32.502213,
+      lon: -99.788717,
+      size_mw: "Up to 1,200 MW (site build-out / interconnect capacity stated)",
+      phasing: "Multi-building campus (multi-phase expansion described)",
+      timeline: "Ongoing development; onsite gas generation stated complete by 2025; major expansion described in 2025",
+      contact: "Lancium main line: 1-833-LANCIUM",
+      confidence: {
+        location: "High (address + municipal boundary docs + multiple descriptions tie to Spinks/Old Anson area)",
+        capacity: "High (multiple sources cite ~1.2 GW scale)"
+      },
+      sources: [
+        { title: "Global Energy Monitor – Abilene data center (address + coordinates + capacity)", url: "https://www.gem.wiki/Abilene_data_center" },
+        { title: "Lancium – Locations (Stargate 1 in Abilene; 1.2GW interconnect; onsite generation note)", url: "https://lancium.com/locations/" },
+        { title: "Mortenson – Lancium Clean Campus project profile", url: "https://www.mortenson.com/projects/lancium-clean-campus" },
+        { title: "Business Facilities – Crusoe AI campus near Abilene (industry profile)", url: "https://businessfacilities.com/crusoe-energy-to-build-11-6b-ai-data-center-campus-near-abilene-tx/" }
+      ]
+    },
+    {
+      id: "iren-sweetwater-1",
+      name: "Sweetwater 1 (IREN Sweetwater Hub site 1)",
+      status: "Under construction",
+      developer: "IREN Limited",
+      county: "West Texas (county reported as Fisher in trade coverage; Sweetwater is Nolan)",
+      location: "883 Farm-to-Market 611, Sweetwater, TX 79556 (address used for deliveries in logistics records)",
+      lat: 32.470951,
+      lon: -100.405937,
+      size_mw: "1,400 MW (announced development capacity)",
+      phasing: "Site-wide build-out; substation under construction",
+      timeline: "Target energization: calendar Q2 2026 (SEC); press coverage references April 2026 timing",
+      contact: "IREN corporate phone (SEC): +61 2 7906 8301; US office: Childress, TX and New York, NY (see SEC filing)",
+      confidence: {
+        location: "Medium (address exists; parcel/precise point not in captured sources — centroid used)",
+        capacity: "High (SEC + press release)"
+      },
+      sources: [
+        { title: "SEC filing – IREN annual report (Sweetwater 1 1,400MW; target Q2 2026)", url: "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm" },
+        { title: "IREN – Sweetwater Hub page (2GW hub framing)", url: "https://iren.com/data-centers/sweetwater" },
+        { title: "Data Center Dynamics – Sweetwater 2 / hub coverage (county and timing context)", url: "https://www.datacenterdynamics.com/en/news/iren-plans-75mw-liquid-cooled-ai-data-center-in-texas/" },
+        { title: "Import/shipping record showing destination as 883 FM 611 (delivery evidence)", url: "https://www.importinfo.com/eastern-car-liners-americas-inc" }
+      ]
+    },
+    {
+      id: "iren-sweetwater-2",
+      name: "Sweetwater 2 (IREN Sweetwater Hub site 2)",
+      status: "Announced",
+      developer: "IREN Limited",
+      county: "Fisher County area (per trade coverage)",
+      location: "1782 Farm-to-Market 540, Hamlin, TX 79520 (directory address); described as >500 acres in press release",
+      lat: 32.885331,
+      lon: -100.121833,
+      size_mw: "600 MW (binding grid connection agreement announced)",
+      phasing: "Second hub site; direct fiber loop to Sweetwater 1 described",
+      timeline: "Energization target: late 2027 (press release) / calendar Q4 2027 (SEC)",
+      contact: "IREN corporate phone (SEC): +61 2 7906 8301",
+      confidence: {
+        location: "Medium (address string exists; centroid used for mapping)",
+        capacity: "High (SEC + press release)"
+      },
+      sources: [
+        { title: "GlobeNewswire – IREN press release (600MW grid connection; late 2027)", url: "https://www.globenewswire.com/news-release/2025/03/17/3043594/0/en/IREN-Secures-2-75GW-for-Data-Centers-in-West-Texas-with-New-600MW-Grid-Connection-Agreement.html" },
+        { title: "SEC filing – IREN annual report (Sweetwater 2 600MW; target Q4 2027)", url: "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm" },
+        { title: "Data Center Dynamics – Sweetwater 2 coverage (county context)", url: "https://www.datacenterdynamics.com/en/news/iren-plans-75mw-liquid-cooled-ai-data-center-in-texas/" }
+      ]
+    },
+    {
+      id: "crusoe-snyder",
+      name: "Crusoe Snyder (modular deployment at Energy Vault tech center)",
+      status: "Announced",
+      developer: "Crusoe Cloud + Energy Vault",
+      county: "Scurry County, TX",
+      location: "9301 Camp Springs Rd, Hermleigh, TX 79526 (Snyder area)",
+      lat: 32.634164,
+      lon: -100.755664,
+      size_mw: "Up to 25 MW IT load (announced)",
+      phasing: "Modular (Spark) units; phased expansion described",
+      timeline: "Announced Feb 2026 (directory event capture); deployment described as scalable",
+      contact: "See operator website links in directory listing",
+      confidence: {
+        location: "Low (address exists but coordinate is community centroid here)",
+        capacity: "Medium (single captured source)"
+      },
+      sources: [
+        { title: "DataCenterMap – Crusoe Snyder listing (25MW IT load; address; Feb 2026 event)", url: "https://www.datacentermap.com/usa/texas/snyder/crusoe-snyder/" },
+        { title: "Latitude.to – Hermleigh, TX coordinates (used as centroid)", url: "https://latitude.to/articles-by-country/us/united-states/123223/hermleigh-texas" }
+      ]
+    },
+    {
+      id: "cipher-barber-lake",
+      name: "Cipher Barber Lake (Colorado City)",
+      status: "Operating",
+      developer: "Cipher Mining Technologies Inc.",
+      county: "Mitchell County, TX",
+      location: "951 Co Rd 204, Colorado City, TX 79512",
+      lat: 32.399635,
+      lon: -100.858380,
+      size_mw: "Phase I: 300 MW energized; Phase II: +500 MW planned (directory claim)",
+      phasing: "Phase I vs Phase II described",
+      timeline: "Phase II timing described as 2029 energization (directory claim)",
+      contact: "See operator website link in directory listing",
+      confidence: {
+        location: "Low (centroid used; parcel point not in captured sources)",
+        capacity: "Low (single captured source for MW/timing)"
+      },
+      sources: [
+        { title: "DataCenterMap – Cipher Barber Lake listing (phase MW claims; address)", url: "https://www.datacentermap.com/usa/texas/colorado-city/cipher-barber-lake/" },
+        { title: "Texas Almanac – Colorado City (centroid coords reference)", url: "https://www.texasalmanac.com/places/colorado-city" }
+      ]
+    },
+    {
+      id: "duos-abilene-edc",
+      name: "Duos Edge AI – Abilene EDC (Region 14 ESC)",
+      status: "Operating",
+      developer: "Duos Edge AI, Inc.",
+      county: "Taylor County, TX",
+      location: "1850 Highway SH 351, Abilene, TX 79601 (Region 14 Education Service Center)",
+      lat: 32.448736,
+      lon: -99.733144,
+      size_mw: "Not disclosed in captured sources",
+      phasing: "Containerized edge deployment",
+      timeline: "Operational / fully operational in early 2026 (directory claim)",
+      contact: "Region 14 ESC: 325-675-8600",
+      confidence: {
+        location: "Medium (host address is strong; centroid used)",
+        capacity: "Low (not disclosed)"
+      },
+      sources: [
+        { title: "DataCenterMap – Duos Edge AI Abilene EDC listing", url: "https://www.datacentermap.com/usa/texas/abilene/duos-edge-ai-abilene-edc/" },
+        { title: "Region 14 Education Service Center – address & phone", url: "https://www.esc14.net/aboutus" }
+      ]
+    }
+  ];
+
+  // === Map setup ===
+  const map = L.map("map", { preferCanvas: true }).setView([32.46, -100.07], 8);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  L.control.scale({ imperial: true, metric: true }).addTo(map);
+
+  // 50 miles in meters
+  const RADIUS_M = 80467.2;
+
+  // City centers (used for the two 50-mile overlays)
+  const CITY = {
+    abilene: { name: "Abilene (50 mi)", lat: 32.448736, lon: -99.733144 },
+    sweetwater: { name: "Sweetwater (50 mi)", lat: 32.470951, lon: -100.405937 }
+  };
+
+  const abileneCircle = L.circle([CITY.abilene.lat, CITY.abilene.lon], {
+    radius: RADIUS_M, weight: 2, fillOpacity: 0.05
+  }).addTo(map).bindTooltip(CITY.abilene.name);
+
+  const sweetwaterCircle = L.circle([CITY.sweetwater.lat, CITY.sweetwater.lon], {
+    radius: RADIUS_M, weight: 2, fillOpacity: 0.05
+  }).addTo(map).bindTooltip(CITY.sweetwater.name);
+
+  // Fit bounds to the two circles
+  map.fitBounds(L.featureGroup([abileneCircle, sweetwaterCircle]).getBounds().pad(0.15));
+
+  // Status -> colors
+  function statusColor(status) {
+    switch (status) {
+      case "Operating": return "#2a7";
+      case "Under construction": return "#f80";
+      case "Announced": return "#06c";
+      case "Paused": return "#888";
+      default: return "#555";
+    }
+  }
+
+  function esc(s) {
+    return String(s || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function popupHtml(site) {
+    const srcLinks = (site.sources || []).map(s =>
+      `<li><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a></li>`
+    ).join("");
+
+    return `
+      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 13px; line-height: 1.35;">
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">${esc(site.name)}</div>
+        <div><b>Status:</b> ${esc(site.status)}</div>
+        <div><b>Developer/operator:</b> ${esc(site.developer)}</div>
+        <div><b>Size:</b> ${esc(site.size_mw)}</div>
+        <div style="margin-top: 6px;"><b>Location:</b> ${esc(site.location)}</div>
+        <div><b>County:</b> ${esc(site.county)}</div>
+        <div><b>Coordinates used:</b> ${site.lat.toFixed(6)}, ${site.lon.toFixed(6)}</div>
+        <div style="margin-top: 6px;"><b>Phasing:</b> ${esc(site.phasing)}</div>
+        <div><b>Timeline:</b> ${esc(site.timeline)}</div>
+        <div style="margin-top: 6px;"><b>Contact:</b> ${esc(site.contact)}</div>
+        <div style="margin-top: 8px;">
+          <details>
+            <summary style="cursor:pointer;"><b>Confidence notes</b></summary>
+            <div style="margin-top: 6px;"><b>Location:</b> ${esc(site.confidence?.location)}</div>
+            <div><b>Capacity:</b> ${esc(site.confidence?.capacity)}</div>
+          </details>
+        </div>
+        <div style="margin-top: 8px;">
+          <details open>
+            <summary style="cursor:pointer;"><b>Sources</b></summary>
+            <ul style="margin: 6px 0 0 18px; padding: 0;">
+              ${srcLinks || "<li>(No links embedded)</li>"}
+            </ul>
+          </details>
+        </div>
+      </div>
+    `;
+  }
+
+  const layer = L.layerGroup().addTo(map);
+  const markerIndex = new Map(); // id -> {site, marker}
+
+  function buildMarkers(sites) {
+    layer.clearLayers();
+    markerIndex.clear();
+
+    sites.forEach(site => {
+      const m = L.circleMarker([site.lat, site.lon], {
+        radius: 8,
+        color: statusColor(site.status),
+        weight: 2,
+        fillColor: statusColor(site.status),
+        fillOpacity: 0.65
+      });
+      m.bindPopup(popupHtml(site), { maxWidth: 420 });
+      m.addTo(layer);
+      markerIndex.set(site.id, { site, marker: m });
+    });
+  }
+
+  // Filtering UI
+  const searchBox = document.getElementById("searchBox");
+  const countBox = document.getElementById("countBox");
+  const statusBoxes = Array.from(document.querySelectorAll(".statusBox"));
+
+  function getActiveStatuses() {
+    const set = new Set();
+    statusBoxes.forEach(cb => { if (cb.checked) set.add(cb.value); });
+    return set;
+  }
+
+  function applyFilters() {
+    const q = (searchBox.value || "").trim().toLowerCase();
+    const statuses = getActiveStatuses();
+
+    const filtered = SITES.filter(s => {
+      const okStatus = statuses.has(s.status);
+      const okName = !q || (s.name || "").toLowerCase().includes(q);
+      return okStatus && okName;
+    });
+
+    buildMarkers(filtered);
+    countBox.textContent = `Showing ${filtered.length} of ${SITES.length} sites.`;
+  }
+
+  // Buttons
+  document.getElementById("selectAllBtn").addEventListener("click", () => {
+    statusBoxes.forEach(cb => cb.checked = true);
+    applyFilters();
+  });
+  document.getElementById("selectNoneBtn").addEventListener("click", () => {
+    statusBoxes.forEach(cb => cb.checked = false);
+    applyFilters();
+  });
+
+  // Event handlers
+  searchBox.addEventListener("input", applyFilters);
+  statusBoxes.forEach(cb => cb.addEventListener("change", applyFilters));
+
+  // Initial render
+  applyFilters();
+</script>
+</body>
+</html>
