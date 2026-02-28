@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>West Texas Data Centers (50-mi radius: Abilene & Sweetwater)</title>
+  <title>West Texas Data Centers (75-mi radius: Abilene)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Leaflet (library links OK; dataset is embedded; tiles are OSM) -->
@@ -52,9 +52,10 @@
   <div id="sidebar">
     <h1>West Texas data center build-out map</h1>
     <div class="hint">
-      Includes planned / under construction / operating data centers within ~50 miles of Abilene and within ~50 miles of Sweetwater,
-      as evidenced by sources captured as of 2026-02-19. Some markers are placed at city/community centroids when parcel-accurate
-      coordinates are not publicly extractable in the captured sources.
+      Includes proposed / announced / under construction / operating data center sites within roughly a 75-mile radius of Abilene,
+      based on sources reviewed as of 2026-02-28. Overlapping entries were consolidated so multi-building campuses appear as a
+      single site marker unless there is a distinct separate project. Some coordinates remain approximate where public records gave
+      a street address or tract description but not a parcel-accurate map point.
     </div>
 
     <div class="group">
@@ -93,95 +94,136 @@
   const SITES = [
     {
       id: "stargate-abilene",
-      name: "Stargate 1 / Lancium Clean Campus (Abilene AI campus)",
+      name: "Crusoe Abilene / Stargate 1 (Lancium Clean Campus)",
       status: "Under construction",
-      developer: "Lancium + Crusoe",
+      developer: "Crusoe + Lancium + Oracle / OpenAI",
       county: "Taylor County, TX",
-      location: "5502 Spinks Rd area; NW Abilene (Old Anson Rd–Spinks Rd band, west of US-277, north of I-20)",
-      lat: 32.502213,
-      lon: -99.788717,
-      size_mw: "Up to 1,200 MW (site build-out / interconnect capacity stated)",
-      phasing: "Multi-building campus (multi-phase expansion described)",
-      timeline: "Ongoing development; onsite gas generation stated complete by 2025; major expansion described in 2025",
-      contact: "Lancium main line: 1-833-LANCIUM",
+      location: "Lancium Clean Campus, 5502 Spinks Rd, Abilene, TX 79601",
+      lat: 32.534000,
+      lon: -99.731000,
+      size_mw: "Initial 200 MW phase; long-term campus build-out to ~1.2 GW",
+      phasing: "Single consolidated marker for the broader multi-building Stargate / Lancium campus (not separate building markers)",
+      timeline: "Construction began 2024; first phase live by late 2025; additional phases still under construction / expansion",
+      contact: "Lancium / Crusoe corporate channels",
       confidence: {
-        location: "High (address + municipal boundary docs + multiple descriptions tie to Spinks/Old Anson area)",
-        capacity: "High (multiple sources cite ~1.2 GW scale)"
+        location: "High (campus address and repeated public references to the Lancium Clean Campus on Spinks Rd)",
+        capacity: "High (multiple public sources reference the 1.2 GW-scale build-out)"
       },
       sources: [
-        { title: "Global Energy Monitor – Abilene data center (address + coordinates + capacity)", url: "https://www.gem.wiki/Abilene_data_center" },
-        { title: "Lancium – Locations (Stargate 1 in Abilene; 1.2GW interconnect; onsite generation note)", url: "https://lancium.com/locations/" },
-        { title: "Mortenson – Lancium Clean Campus project profile", url: "https://www.mortenson.com/projects/lancium-clean-campus" },
-        { title: "Business Facilities – Crusoe AI campus near Abilene (industry profile)", url: "https://businessfacilities.com/crusoe-energy-to-build-11-6b-ai-data-center-campus-near-abilene-tx/" }
+        { title: "Crusoe confirms plans for 200MW AI data center in Texas (DCD)", url: "https://www.datacenterdynamics.com/en/news/crusoe-confirms-plans-for-200mw-ai-data-center-in-texas/" },
+        { title: "Crusoe announces flagship Abilene data center is live", url: "https://www.crusoe.ai/resources/newsroom/crusoe-announces-flagship-abilene-data-center-is-live" },
+        { title: "Mortenson – Abilene Data Center Development Project", url: "https://www.mortenson.com/projects/abilene-data-center-development" }
+      ]
+    },
+    {
+      id: "duos-abilene-edc",
+      name: "Duos Edge AI – Abilene EDC (Region 14 ESC)",
+      status: "Operating",
+      developer: "Duos Edge AI, Inc. + Region 14 Education Service Center",
+      county: "Taylor County, TX",
+      location: "1850 Texas State Highway 351, Abilene, TX 79601 (Region 14 ESC campus)",
+      lat: 32.516600,
+      lon: -99.665000,
+      size_mw: "Not publicly disclosed",
+      phasing: "Containerized edge deployment",
+      timeline: "Deployed Jan. 2026; fully operational in early 2026",
+      contact: "Region 14 ESC / Duos Edge AI",
+      confidence: {
+        location: "High (host campus and highway location publicly identified)",
+        capacity: "Low (no MW figure publicly stated in the reviewed sources)"
+      },
+      sources: [
+        { title: "Duos Edge AI Deploys Edge Data Center in Abilene, Texas", url: "https://ir.duostechnologies.com/news-events/press-releases/detail/822/duos-edge-ai-deploys-edge-data-center-in-abilene-texas" },
+        { title: "Duos deploys Edge data center in Abilene, Texas (DCD)", url: "https://www.datacenterdynamics.com/en/news/duos-deploys-edge-data-center-in-abilene-texas/" },
+        { title: "DataCenterMap – Duos Edge AI Abilene EDC", url: "https://www.datacentermap.com/usa/texas/abilene/duos-edge-ai-abilene-edc/" }
+      ]
+    },
+    {
+      id: "vantage-frontier",
+      name: "Vantage Frontier (Shackelford County)",
+      status: "Under construction",
+      developer: "Vantage Data Centers",
+      county: "Shackelford County, TX",
+      location: "Intersection of TX-351 and FM 604, Shackelford County, TX",
+      lat: 32.789700,
+      lon: -99.203900,
+      size_mw: "Large multi-phase campus; 1,200-acre / 10-building scale publicly described",
+      phasing: "Multi-phase hyperscale campus",
+      timeline: "Publicly reported in 2025; construction expected to run through 2029",
+      contact: "Vantage corporate channels",
+      confidence: {
+        location: "High (intersection publicly identified in multiple sources)",
+        capacity: "Medium (campus scale described, but not a single clean MW figure in the reviewed sources)"
+      },
+      sources: [
+        { title: "Vantage plots 1,000-acre data center campus in Texas (DCD)", url: "https://www.datacenterdynamics.com/en/news/vantage-plots-1000-acre-data-center-campus-in-texas/" },
+        { title: "OpenAI, Oracle, and SoftBank expand Stargate with five new AI data center sites", url: "https://openai.com/index/five-new-stargate-sites/" }
       ]
     },
     {
       id: "iren-sweetwater-1",
-      name: "Sweetwater 1 (IREN Sweetwater Hub site 1)",
+      name: "IREN Sweetwater 1",
       status: "Under construction",
-      developer: "IREN Limited",
-      county: "West Texas (county reported as Fisher in trade coverage; Sweetwater is Nolan)",
-      location: "883 Farm-to-Market 611, Sweetwater, TX 79556 (address used for deliveries in logistics records)",
-      lat: 32.470951,
-      lon: -100.405937,
-      size_mw: "1,400 MW (announced development capacity)",
-      phasing: "Site-wide build-out; substation under construction",
-      timeline: "Target energization: calendar Q2 2026 (SEC); press coverage references April 2026 timing",
-      contact: "IREN corporate phone (SEC): +61 2 7906 8301; US office: Childress, TX and New York, NY (see SEC filing)",
+      developer: "IREN (Iris Energy)",
+      county: "Nolan County, TX",
+      location: "883 Farm-to-Market 611, Sweetwater, TX 79556",
+      lat: 32.435600,
+      lon: -100.221700,
+      size_mw: "1,400 MW",
+      phasing: "First major phase of IREN’s Sweetwater hub",
+      timeline: "Under construction; substation energization targeted in 2026",
+      contact: "IREN corporate channels",
       confidence: {
-        location: "Medium (address exists; parcel/precise point not in captured sources — centroid used)",
-        capacity: "High (SEC + press release)"
+        location: "Medium (street address is public; point remains approximate at site level)",
+        capacity: "High (publicly stated in operator and industry sources)"
       },
       sources: [
-        { title: "SEC filing – IREN annual report (Sweetwater 1 1,400MW; target Q2 2026)", url: "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm" },
-        { title: "IREN – Sweetwater Hub page (2GW hub framing)", url: "https://iren.com/data-centers/sweetwater" },
-        { title: "Data Center Dynamics – Sweetwater 2 / hub coverage (county and timing context)", url: "https://www.datacenterdynamics.com/en/news/iren-plans-75mw-liquid-cooled-ai-data-center-in-texas/" },
-        { title: "Import/shipping record showing destination as 883 FM 611 (delivery evidence)", url: "https://www.importinfo.com/eastern-car-liners-americas-inc" }
+        { title: "IREN – Sweetwater data center", url: "https://iren.com/data-centers/sweetwater" },
+        { title: "DataCenterMap – IREN Sweetwater 1", url: "https://www.datacentermap.com/usa/texas/sweetwater/iren-sweetwater-1/" }
       ]
     },
     {
       id: "iren-sweetwater-2",
-      name: "Sweetwater 2 (IREN Sweetwater Hub site 2)",
-      status: "Announced",
-      developer: "IREN Limited",
-      county: "Fisher County area (per trade coverage)",
-      location: "1782 Farm-to-Market 540, Hamlin, TX 79520 (directory address); described as >500 acres in press release",
-      lat: 32.885331,
-      lon: -100.121833,
-      size_mw: "600 MW (binding grid connection agreement announced)",
-      phasing: "Second hub site; direct fiber loop to Sweetwater 1 described",
-      timeline: "Energization target: late 2027 (press release) / calendar Q4 2027 (SEC)",
-      contact: "IREN corporate phone (SEC): +61 2 7906 8301",
+      name: "IREN Sweetwater 2",
+      status: "Under construction",
+      developer: "IREN (Iris Energy)",
+      county: "Fisher County, TX",
+      location: "1782 Farm-to-Market 540, Hamlin, TX 79520",
+      lat: 32.885900,
+      lon: -100.127000,
+      size_mw: "600 MW",
+      phasing: "Second major phase of IREN’s Sweetwater hub",
+      timeline: "Under construction / planned expansion; energization targeted in 2027",
+      contact: "IREN corporate channels",
       confidence: {
-        location: "Medium (address string exists; centroid used for mapping)",
-        capacity: "High (SEC + press release)"
+        location: "Medium (street address is public; point remains approximate at site level)",
+        capacity: "High (publicly stated in operator and industry sources)"
       },
       sources: [
-        { title: "GlobeNewswire – IREN press release (600MW grid connection; late 2027)", url: "https://www.globenewswire.com/news-release/2025/03/17/3043594/0/en/IREN-Secures-2-75GW-for-Data-Centers-in-West-Texas-with-New-600MW-Grid-Connection-Agreement.html" },
-        { title: "SEC filing – IREN annual report (Sweetwater 2 600MW; target Q4 2027)", url: "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm" },
-        { title: "Data Center Dynamics – Sweetwater 2 coverage (county context)", url: "https://www.datacenterdynamics.com/en/news/iren-plans-75mw-liquid-cooled-ai-data-center-in-texas/" }
+        { title: "IREN – Sweetwater data center", url: "https://iren.com/data-centers/sweetwater" },
+        { title: "DataCenterMap – IREN Sweetwater 2", url: "https://www.datacentermap.com/usa/texas/sweetwater/iren-sweetwater-2/" }
       ]
     },
     {
       id: "crusoe-snyder",
-      name: "Crusoe Snyder (modular deployment at Energy Vault tech center)",
+      name: "Crusoe Snyder / Energy Vault site",
       status: "Announced",
       developer: "Crusoe Cloud + Energy Vault",
       county: "Scurry County, TX",
-      location: "9301 Camp Springs Rd, Hermleigh, TX 79526 (Snyder area)",
-      lat: 32.634164,
-      lon: -100.755664,
-      size_mw: "Up to 25 MW IT load (announced)",
-      phasing: "Modular (Spark) units; phased expansion described",
-      timeline: "Announced Feb 2026 (directory event capture); deployment described as scalable",
-      contact: "See operator website links in directory listing",
+      location: "9301 Camp Springs Rd, Hermleigh, TX 79526",
+      lat: 32.639100,
+      lon: -100.226300,
+      size_mw: "Up to 25 MW IT load",
+      phasing: "Modular Spark deployment; phased expansion described",
+      timeline: "Announced / early-stage deployment discussed in 2026",
+      contact: "Crusoe / Energy Vault corporate channels",
       confidence: {
-        location: "Low (address exists but coordinate is community centroid here)",
-        capacity: "Medium (single captured source)"
+        location: "High (street address is supported by both data center listing and Texas utility filing)",
+        capacity: "Medium (25 MW figure publicly stated in directory-style source)"
       },
       sources: [
-        { title: "DataCenterMap – Crusoe Snyder listing (25MW IT load; address; Feb 2026 event)", url: "https://www.datacentermap.com/usa/texas/snyder/crusoe-snyder/" },
-        { title: "Latitude.to – Hermleigh, TX coordinates (used as centroid)", url: "https://latitude.to/articles-by-country/us/united-states/123223/hermleigh-texas" }
+        { title: "DataCenterMap – Crusoe Snyder", url: "https://www.datacentermap.com/usa/texas/snyder/crusoe-snyder/" },
+        { title: "Texas PUC filing (Cross Trails BESS Snyder)", url: "https://interchange.puc.texas.gov/Documents/53385_3719_1522614.PDF" }
       ]
     },
     {
@@ -191,47 +233,48 @@
       developer: "Cipher Mining Technologies Inc.",
       county: "Mitchell County, TX",
       location: "951 Co Rd 204, Colorado City, TX 79512",
-      lat: 32.399635,
-      lon: -100.858380,
-      size_mw: "Phase I: 300 MW energized; Phase II: +500 MW planned (directory claim)",
-      phasing: "Phase I vs Phase II described",
-      timeline: "Phase II timing described as 2029 energization (directory claim)",
-      contact: "See operator website link in directory listing",
+      lat: 32.424900,
+      lon: -100.866400,
+      size_mw: "Phase I 300 MW; expansion plans publicly described for additional capacity",
+      phasing: "Phase I operating; Phase II / expansion publicly discussed",
+      timeline: "Operating with additional expansion planned",
+      contact: "Cipher corporate channels",
       confidence: {
-        location: "Low (centroid used; parcel point not in captured sources)",
-        capacity: "Low (single captured source for MW/timing)"
+        location: "High (street address is public)",
+        capacity: "Medium (expansion figures vary by source, but major expansion is clearly public)"
       },
       sources: [
-        { title: "DataCenterMap – Cipher Barber Lake listing (phase MW claims; address)", url: "https://www.datacentermap.com/usa/texas/colorado-city/cipher-barber-lake/" },
-        { title: "Texas Almanac – Colorado City (centroid coords reference)", url: "https://www.texasalmanac.com/places/colorado-city" }
+        { title: "DataCenterMap – Cipher Barber Lake", url: "https://www.datacentermap.com/usa/texas/colorado-city/cipher-barber-lake/" },
+        { title: "Cipher Mining acquires more than 500 acres across two sites in Texas for crypto and HPC use (DCD)", url: "https://www.datacenterdynamics.com/en/news/cipher-mining-acquires-more-than-500-acres-across-two-sites-in-texas-for-crypto-and-hpc-use/" }
       ]
     },
     {
-      id: "duos-abilene-edc",
-      name: "Duos Edge AI – Abilene EDC (Region 14 ESC)",
-      status: "Operating",
-      developer: "Duos Edge AI, Inc.",
-      county: "Taylor County, TX",
-      location: "1850 Highway SH 351, Abilene, TX 79601 (Region 14 Education Service Center)",
-      lat: 32.448736,
-      lon: -99.733144,
-      size_mw: "Not disclosed in captured sources",
-      phasing: "Containerized edge deployment",
-      timeline: "Operational / fully operational in early 2026 (directory claim)",
-      contact: "Region 14 ESC: 325-675-8600",
+      id: "thm1a-lueders-haskell",
+      name: "THM1A Data Center (THM campus)",
+      status: "Under construction",
+      developer: "Homebound Group LLC / HDR Engineering",
+      county: "Haskell County, TX (with Lueders / Jones County references in trade coverage)",
+      location: "10357 Loop Road, Haskell, TX 79521 (public filing); trade coverage also references Bean Road near Lueders",
+      lat: 32.980000,
+      lon: -99.570000,
+      size_mw: "MW not publicly disclosed",
+      phasing: "Single 280,000 sq. ft. data center project",
+      timeline: "Construction start June 18, 2025; estimated completion April 16, 2027",
+      contact: "No public project contact listed beyond filing parties",
       confidence: {
-        location: "Medium (host address is strong; centroid used)",
-        capacity: "Low (not disclosed)"
+        location: "Medium (public filing gives a specific address, but trade write-ups describe the site differently)",
+        capacity: "Low (no MW figure in the reviewed public sources)"
       },
       sources: [
-        { title: "DataCenterMap – Duos Edge AI Abilene EDC listing", url: "https://www.datacentermap.com/usa/texas/abilene/duos-edge-ai-abilene-edc/" },
-        { title: "Region 14 Education Service Center – address & phone", url: "https://www.esc14.net/aboutus" }
+        { title: "TDLR TABS – Project TABS2025019833", url: "https://www.tdlr.texas.gov/TABS/Projects/TABS2025019833" },
+        { title: "Data center to be built in Lueders, Texas (DCD)", url: "https://www.datacenterdynamics.com/en/news/data-center-to-be-built-in-lueders-texas/" },
+        { title: "DataCenterMap – THM1A Data Center", url: "https://www.datacentermap.com/usa/texas/abilene/thm1a-data-center/" }
       ]
     }
   ];
 
   // === Map setup ===
-  const map = L.map("map", { preferCanvas: true }).setView([32.46, -100.07], 8);
+  const map = L.map("map", { preferCanvas: true }).setView([32.55, -99.95], 8);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -240,25 +283,19 @@
 
   L.control.scale({ imperial: true, metric: true }).addTo(map);
 
-  // 50 miles in meters
-  const RADIUS_M = 80467.2;
+  // 75 miles in meters
+  const RADIUS_M = 120700.8;
 
-  // City centers (used for the two 50-mile overlays)
+  // Center point for the research scope
   const CITY = {
-    abilene: { name: "Abilene (50 mi)", lat: 32.448736, lon: -99.733144 },
-    sweetwater: { name: "Sweetwater (50 mi)", lat: 32.470951, lon: -100.405937 }
+    abilene: { name: "Abilene (75 mi)", lat: 32.448736, lon: -99.733144 }
   };
 
   const abileneCircle = L.circle([CITY.abilene.lat, CITY.abilene.lon], {
     radius: RADIUS_M, weight: 2, fillOpacity: 0.05
   }).addTo(map).bindTooltip(CITY.abilene.name);
 
-  const sweetwaterCircle = L.circle([CITY.sweetwater.lat, CITY.sweetwater.lon], {
-    radius: RADIUS_M, weight: 2, fillOpacity: 0.05
-  }).addTo(map).bindTooltip(CITY.sweetwater.name);
-
-  // Fit bounds to the two circles
-  map.fitBounds(L.featureGroup([abileneCircle, sweetwaterCircle]).getBounds().pad(0.15));
+  map.fitBounds(abileneCircle.getBounds().pad(0.15));
 
   // Status -> colors
   function statusColor(status) {
